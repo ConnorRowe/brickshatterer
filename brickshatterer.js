@@ -146,7 +146,52 @@ class timer
 	}
 }
 
-<!-- Global Vars -->
+class block
+{
+	constructor(position,type)
+	{
+		this.x = position.x;
+		this.y = position.y;
+	}
+}
+
+class button
+{
+	constructor(x,y,width,height,colour,text,Function)
+	{
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
+		this.colour = colour;
+		this.text = text;
+		this.eventFunc = Function;
+	}
+	
+	update()
+	{
+		if(clientX != null)
+		{
+			if(AABBIntersect(clientX,clientY,1,1,this.x,this.y,this.width,this.height))
+			{
+				this.eventFunc(true);
+			}
+			else
+				this.eventFunc(false);
+		}
+	}
+	
+	draw()
+	{
+		//context.fillStyle(this.colour);
+		context.strokeStyle = "#F";
+		context.strokeRect(this.x,this.y,this.width,this.height);
+		//context.fillStyle("#F");
+		context.fillText(this.text, this.x + this.width/2, this.y + this.height/2);
+	}
+}
+
+<!-- Global Vars -------------------------------------------------------------------------------------------------------------------------------------->
 //only need to declare 'var' once
 var
 	//delcared here are the CONSTANTS
@@ -158,6 +203,15 @@ var
 	keyLeft		= 65, // A
 	keyRight	= 68, // D
 	keyStart	= 32, // spacebar
+	
+	touchLeft	= false,
+	touchRight	= false,
+	
+	clientX,
+	clientY,
+	
+	moveLeft = false,
+	moveRight = false,
 
 	//game elements
 	canvas,		//play area
@@ -169,7 +223,24 @@ var
 	deltaTime = 0,	//time difference between last frames
 	time = 0,		//total time (in seconds)
 	timeFrac = 0,	//time remainder in seconds (0.0 - 1.0)
+	
+	//buttons
+	buttonLeft = new button(20, 480, 100, 100, "#CCC", "LEFT", function(bool)
+	{
+		if(bool)
+			touchLeft = true;
+		else
+			touchLeft = false;
+	}),
 
+	buttonRight = new button(680, 480, 100, 100, "#CCC", "RIGHT", function(bool)
+	{
+		if(bool)
+			touchRight = true;
+		else
+			touchRight = false;
+	}),
+	
 	paddle =
 	{
 		x: null,	//coords
@@ -181,14 +252,14 @@ var
 		update: function()
 		{
 			//Input
-			if (keystate[keyLeft] || keystate[keyRight])
+			if (moveLeft || moveRight)
 			{
-				if(keystate[keyLeft])
+				if(moveLeft)
 				{
 					this.x -= (deltaTime * 0.5);
 					this.velocity = -1;
 				}
-				if(keystate[keyRight])
+				if(moveRight)
 				{
 					this.x += (deltaTime * 0.5);
 					this.velocity = 1;
@@ -335,6 +406,45 @@ var
 		{
 			delete keystate[evt.keyCode];
 		})
+		
+		document.addEventListener("touchstart", function(evt)
+	 	{
+			//cache coords
+			clientX = evt.touches[0].clientX;
+			clientY = evt.touches[0].clientY;
+			
+			console.log("clientX:" + clientX + ", clientY: " + clientY);
+		}, false);
+		
+		document.addEventListener("touchend", function(evt)
+	 	{
+			//cache coords
+			clientX = null;
+			clientY = null;
+		}, false);
+		
+		document.addEventListener("touchcancel", function(evt)
+	 	{
+			//cache coords
+			clientX = null;
+			clientY = null;
+		}, false);
+		
+		document.addEventListener("mousedown", function(evt)
+	 	{
+			//cache coords
+			clientX = evt.clientX;
+			clientY = evt.clientY;
+			
+			console.log("clientX:" + clientX + ", clientY: " + clientY);
+		}, false);
+		
+		document.addEventListener("mouseup", function(evt)
+	 	{
+			//cache coords
+			clientX = null;
+			clientY = null;
+		}, false);
 
 		init(); //initialise game objects
 
@@ -346,6 +456,16 @@ var
 			time = (gameTime / 1000);
 			timeFrac = time % 1;
 			var boxColour = HSVtoRGB(lerp(0,1,timeFrac*0.1),1,1);
+			
+			if(keystate[keyLeft])
+				moveLeft = true;
+			else
+				moveLeft = false;
+			
+			if(keystate[keyRight])
+				moveRight = true;
+			else
+				moveRight = false;
 
 			update();
 			draw();
@@ -357,7 +477,7 @@ var
 		window.requestAnimationFrame(loop, canvas);
 	}
 
-	<!-- Helper Functions -->
+	<!-- Helper Functions ----------------------------------------------------------------------------------------------------------------->
 	//calculates the surface normal of colliding surface (x2, y2) to use for reflection calculations
 	//position values must be centered (not top left) for it to work
 	function calcCollisionNormal(x1,y1,x2,y2,width2,height2)
@@ -483,7 +603,7 @@ var
 		return newV;
 	}
 
-	<!-- Main game stuff -->
+	<!-- Main game stuff --------------------------------------------------------------------------------------------------------------->
 
 	function init()
 	{
@@ -497,6 +617,8 @@ var
 	{
 		paddle.update();
 		ball.update();
+		buttonLeft.update();
+		buttonRight.update();
 	}
 
 	//drawing everything to the canvas
@@ -509,7 +631,7 @@ var
 		var boxColour = HSVtoRGB(lerp(0,1,timeFrac),1,1);
 
 		context.fillStyle = "#FFF";	//white draw colour
-
+		context.strokeStyle="#FF0000";
 		//text for the stuff
 		context.font = "16px Calibri"; //size and font
 
@@ -518,7 +640,9 @@ var
 		context.fillText("timeFrac: " + timeFrac, 10, 75);
 		context.fillText("ball pos: x = " + (ball.x - ball.x % 1) + ", y = " + (ball.y - ball.y % 1), 10, 100);
 		context.fillText("ball direction: " + ball.direction, 10, 125);
-
+		
+		context.fillText("clientX: " + clientX + ", clientY: " + clientY, 10, 150);
+		
 		var testVec1 = new vector2(0,-1);
 		var testVec2 = new vector2(0,1);
 		context.fillText(testVec1 + " -> " + testVec2 + "  reflection: " + calcReflectedVector(testVec1,testVec2) + " (testing reflection maths)", 10, 175);
@@ -528,6 +652,9 @@ var
 
 		context.fillStyle = "#FFF"; //white draw colour
 		ball.draw();
+		context.fillStyle = "#FFF"; //white draw colour
+		buttonLeft.draw();
+		buttonRight.draw();
 
 		context.restore();
 	}
