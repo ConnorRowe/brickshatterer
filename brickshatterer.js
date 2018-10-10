@@ -179,6 +179,8 @@ class button
 			else
 				this.eventFunc(false);
 		}
+		else
+			this.eventFunc(false);
 	}
 	
 	draw()
@@ -457,12 +459,12 @@ var
 			timeFrac = time % 1;
 			var boxColour = HSVtoRGB(lerp(0,1,timeFrac*0.1),1,1);
 			
-			if(keystate[keyLeft])
+			if(keystate[keyLeft] || touchLeft)
 				moveLeft = true;
 			else
 				moveLeft = false;
 			
-			if(keystate[keyRight])
+			if(keystate[keyRight] || touchRight)
 				moveRight = true;
 			else
 				moveRight = false;
