@@ -146,15 +146,6 @@ class timer
 	}
 }
 
-class block
-{
-	constructor(position,type)
-	{
-		this.x = position.x;
-		this.y = position.y;
-	}
-}
-
 class button
 {
 	constructor(x,y,width,height,colour,text,Function)
@@ -185,11 +176,22 @@ class button
 	
 	draw()
 	{
-		//context.fillStyle(this.colour);
-		context.strokeStyle = "#F";
-		context.strokeRect(this.x,this.y,this.width,this.height);
-		//context.fillStyle("#F");
-		context.fillText(this.text, this.x + this.width/2, this.y + this.height/2);
+		if(this.colour != null)
+		{
+			context.strokeStyle = this.colour;
+			context.strokeRect(this.x,this.y,this.width,this.height);
+			//context.fillStyle("#F");
+			context.fillText(this.text, this.x + this.width/2, this.y + this.height/2);
+		}
+	}
+}
+
+class block
+{
+	constructor(position,type)
+	{
+		this.x = position.x;
+		this.y = position.y;
 	}
 }
 
@@ -227,7 +229,7 @@ var
 	timeFrac = 0,	//time remainder in seconds (0.0 - 1.0)
 	
 	//buttons
-	buttonLeft = new button(20, 480, 100, 100, "#CCC", "LEFT", function(bool)
+	buttonLeft = new button(0, 0, WIDTH/2, HEIGHT, null, "LEFT", function(bool)
 	{
 		if(bool)
 			touchLeft = true;
@@ -235,7 +237,7 @@ var
 			touchLeft = false;
 	}),
 
-	buttonRight = new button(680, 480, 100, 100, "#CCC", "RIGHT", function(bool)
+	buttonRight = new button(WIDTH/2, 0, WIDTH/2, HEIGHT, null, "RIGHT", function(bool)
 	{
 		if(bool)
 			touchRight = true;
@@ -248,7 +250,7 @@ var
 		x: null,	//coords
 		y: null,
 		width: 80,	//sizing
-		height: 20,
+		height: 10,
 		velocity: 0,
 
 		update: function()
@@ -294,8 +296,11 @@ var
 
 		setReflectNormal: function(v)
 		{
-			this.reflectNormal.x = v.x;
-			this.reflectNormal.y = v.y;
+			if (v != undefined)
+			{
+				this.reflectNormal.x = v.x;
+				this.reflectNormal.y = v.y;
+			}
 		},
 
 		setDirection: function(x,y)
@@ -362,10 +367,11 @@ var
 			}
 			else
 			{
-				if (this.collideTimer.stopwatch(.5))
+				if (this.collideTimer.stopwatch(.1))
 				{
 					this.canCollide = true;
 				}
+				else this.canCollide = false;
 			}
 
 			//reset the ball when ball is outisde the canvas (bottom side)
@@ -412,10 +418,10 @@ var
 		document.addEventListener("touchstart", function(evt)
 	 	{
 			//cache coords
-			clientX = evt.touches[0].clientX;
-			clientY = evt.touches[0].clientY;
+			clientX = evt.touches[0].clientX - 8;
+			clientY = evt.touches[0].clientY - 8;
 			
-			console.log("clientX:" + clientX + ", clientY: " + clientY);
+			console.log("clientX:" + clientX-8 + ", clientY: " + clientY-8);
 		}, false);
 		
 		document.addEventListener("touchend", function(evt)
@@ -435,10 +441,10 @@ var
 		document.addEventListener("mousedown", function(evt)
 	 	{
 			//cache coords
-			clientX = evt.clientX;
-			clientY = evt.clientY;
+			clientX = evt.clientX - 8;
+			clientY = evt.clientY - 8;
 			
-			console.log("clientX:" + clientX + ", clientY: " + clientY);
+			console.log("clientX:" + clientX-8 + ", clientY: " + clientY-8);
 		}, false);
 		
 		document.addEventListener("mouseup", function(evt)
@@ -636,10 +642,10 @@ var
 		context.strokeStyle="#FF0000";
 		//text for the stuff
 		context.font = "16px Calibri"; //size and font
-
-		context.fillText("deltaTime: " + deltaTime, 10, 25);
-		context.fillText("time: " + time, 10, 50);
-		context.fillText("timeFrac: " + timeFrac, 10, 75);
+		
+		context.fillText(Math.ceil(1000/deltaTime) + " FPS", 10, 25);
+		context.fillText("deltaTime: " + deltaTime, 10, 50);
+		context.fillText("time: " + time, 10, 75);
 		context.fillText("ball pos: x = " + (ball.x - ball.x % 1) + ", y = " + (ball.y - ball.y % 1), 10, 100);
 		context.fillText("ball direction: " + ball.direction, 10, 125);
 		
