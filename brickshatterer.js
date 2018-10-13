@@ -200,7 +200,7 @@ class block
 var
 	//delcared here are the CONSTANTS
 	WIDTH	= 800,
-	HEIGHT	= 600,
+	HEIGHT	= 450,
 	pi =  Math.PI, //so I don't have to type Math.PI;
 
 	//keycodes -> https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
