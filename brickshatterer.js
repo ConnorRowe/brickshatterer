@@ -192,14 +192,20 @@ class brick
 	{
 		this.x = position.x;
 		this.y = position.y;
-		this.width = 100;
-		this.height = 20;
+		this.width = 50;
+		this.height = 15;
 		this.type = type;
+        this.hitFlag = false;
+		this.id = null;
 	}
 	
 	update()
 	{
-		//update
+		if (this.hitFlag)
+        {
+            brickArray.splice(this.id, 1);
+			delete this;
+        }
 	}
 	
 	draw()
@@ -207,6 +213,12 @@ class brick
 		context.fillStyle = "#C40";
 		context.fillRect(this.x,this.y,this.width,this.height);
 	}
+    
+    collide(id)
+    {
+        this.hitFlag = true;
+		this.id = id;
+    }
 }
 
 <!-- Global Vars -------------------------------------------------------------------------------------------------------------------------------------->
@@ -221,11 +233,13 @@ var
 	keyLeft		= 65, // A
 	keyRight	= 68, // D
 	keyStart	= 32, // spacebar
+    keyDebug    = 80, // P
 	
 	touchLeft	= false,
 	touchRight	= false,
+    showDebug   = false,
 	
-	clientX,
+	clientX,   //position of mouse click / touch input
 	clientY,
 	
 	moveLeft = false,
@@ -241,14 +255,18 @@ var
 	deltaTime = 0,	//time difference between last frames
 	time = 0,		//total time (in seconds)
 	timeFrac = 0,	//time remainder in seconds (0.0 - 1.0)
+	debugTimer = new timer(),
 	
 	//<!-- Objects ---------------------------------------------------------------------------------------------------------------------------------->
 	
 	//Array for all bricks
 	brickArray = [],
-	
-	brick1 = new brick(new vector2(40,40), 0),
-		
+	brickPositions =
+    [
+        new vector2(80,40), new vector2(140,40), new vector2(200,40), new vector2(260,40), new vector2(320,40), new vector2(380,40),  new vector2(440,40), new vector2(500,40), new vector2(560,40), new vector2(620,40), new vector2(680,40),
+        new vector2(105,65), new vector2(165,65), new vector2(225,65), new vector2(285,65), new vector2(345,65), new vector2(405,65), new vector2(465,65), new vector2(525,65), new vector2(585,65), new vector2(645,65)
+    ],
+    		
 	//buttons
 	buttonLeft = new button(0, 0, WIDTH/2, HEIGHT, null, "LEFT", function(bool)
 	{
@@ -309,7 +327,7 @@ var
 		y: null,
 		direction: new vector2(0,0),
 		side: 20,
-		speed: 4,
+		speed: 3,
 		iscolliding: false,
 		canCollide: true,
 		reflectNormal: new vector2(0,0),
@@ -337,9 +355,9 @@ var
 			this.y = paddle.y - 20;
 
 			//generate random x val for the direction vector
-			var r = Math.random();
+			//var r = Math.random();
 
-			this.setDirection(r,-1);
+			this.setDirection(1,-1);
 		},
 
 		update: function()
@@ -351,13 +369,30 @@ var
 				this.y += (this.direction.y) * this.speed;
 			}
 			
+            <!-- Collision Checks ----------------------------------------------------------------------------------------------------------------------------------------------------->
+            
+            //paddle collision
 			if (AABBIntersect(paddle.x,paddle.y,paddle.width,paddle.height,
 							  this.x, this.y, this.side, this.side))
 			{
 				this.iscolliding = true;
 				this.setReflectNormal(calcCollisionNormal(this.x + this.side/2, this.y + this.side/2, paddle.x + paddle.width/2, paddle.y + paddle.height/2, paddle.width, paddle.height));
 			}
-
+            
+            //brick collision
+            //update all bricks in array
+            for (var i = 0; i < brickArray.length; i++)
+            {
+                var brick = brickArray[i];
+                if (AABBIntersect(brick.x, brick.y, brick.width, brick.height,
+                                  this.x,  this.y,   this.side,    this.side))
+                {
+                    this.iscolliding = true;
+				    this.setReflectNormal(calcCollisionNormal(this.x + this.side/2, this.y + this.side/2, brick.x + brick.width/2, brick.y + brick.height/2, brick.width, brick.height));
+					brick.collide(i);
+                }
+            }
+            
 			//Window collision
 			if (this.y < 1)                  		//Top
 			{
@@ -391,7 +426,7 @@ var
 			}
 			else
 			{
-				if (this.collideTimer.stopwatch(.05))
+				if (this.collideTimer.stopwatch(.01))
 				{
 					this.canCollide = true;
 				}
@@ -412,9 +447,6 @@ var
 			context.fillRect(this.x,this.y,this.side,this.side);
 		}
 	}
-
-//Append brick array
-brickArray.push(brick1);
 
 function Main()
 {
@@ -501,6 +533,15 @@ function Main()
 			moveRight = true;
 		else
 			moveRight = false;
+		
+		if(keystate[keyDebug])
+			if(debugTimer.stopwatch(1))
+				{
+					if(showDebug)
+						showDebug = false;
+					else
+						showDebug = true;
+				}
 
 		update();
 		draw();
@@ -645,6 +686,12 @@ function init()
 	paddle.x = WIDTH/2;
 	paddle.y = HEIGHT - 60;
 	ball.serve();
+    
+    for (var i = 0; i < brickPositions.length; i++)
+    {
+        var newBrick = new brick(brickPositions[i], 0);
+        brickArray.push(newBrick);
+    }
 }
 
 //this is where we call to update all out objects
@@ -689,22 +736,24 @@ function draw()
 	context.strokeStyle="#FF0000";
 	//text for the stuff
 	context.font = "16px Calibri"; //size and font
-
-	context.fillText(Math.ceil(1000/deltaTime) + " FPS", 10, 25);
-	context.fillText("deltaTime: " + deltaTime, 10, 50);
-	context.fillText("time: " + time, 10, 75);
-	context.fillText("ball pos: x = " + (ball.x - ball.x % 1) + ", y = " + (ball.y - ball.y % 1), 10, 100);
-	context.fillText("ball direction: " + ball.direction, 10, 125);
-
-	context.fillText("clientX: " + clientX + ", clientY: " + clientY, 10, 150);
-
-	var testVec1 = new vector2(0,-1);
-	var testVec2 = new vector2(0,1);
-	context.fillText(testVec1 + " -> " + testVec2 + "  reflection: " + calcReflectedVector(testVec1,testVec2) + " (testing reflection maths)", 10, 175);
-
+	
+	//draw debug text
+	if(showDebug)
+	{
+		context.fillText(Math.ceil(1000/deltaTime) + " FPS", 10, 25);
+		context.fillText("deltaTime: " + deltaTime, 10, 50);
+		context.fillText("time: " + time, 10, 75);
+		context.fillText("ball pos: x = " + (ball.x - ball.x % 1) + ", y = " + (ball.y - ball.y % 1), 10, 100);
+		context.fillText("ball direction: " + ball.direction, 10, 125);
+		context.fillText("clientX: " + clientX + ", clientY: " + clientY, 10, 150);
+		var testVec1 = new vector2(0,-1);
+		var testVec2 = new vector2(0,1);
+		context.fillText(testVec1 + " -> " + testVec2 + "  reflection: " + calcReflectedVector(testVec1,testVec2) + " (testing reflection maths)", 10, 175);
+	}
 	
 	
 	context.restore();
 }
 
 Main();
+
