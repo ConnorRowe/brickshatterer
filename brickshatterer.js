@@ -194,7 +194,7 @@ class brick
 		this.y = position.y;
 		this.width = 50;
 		this.height = 15;
-		this.type = type;
+		this.state = state;
         this.hitFlag = false;
 		this.id = null;
 	}
@@ -203,14 +203,45 @@ class brick
 	{
 		if (this.hitFlag)
         {
-            brickArray.splice(this.id, 1);
-			delete this;
+			this.state --;
+			
+			// iff state is less than or equal to 0, remove the brick
+			if (this.state <= 0)
+            {
+				brickArray.splice(this.id, 1);
+				delete this;
+			}
+			
+			this.hitFlag = false;
         }
 	}
 	
 	draw()
 	{
-		context.fillStyle = "#C40";
+		var rainbowColour = HSVtoRGB(lerp(0,1,timeFrac),1,1);
+		
+		switch (this.state)
+		{
+			case 0:
+				context.fillStyle = "#000";
+				break;
+			case 1:
+				context.fillStyle = "#C40";
+				break;
+			case 2:
+				context.fillStyle = "#16F";
+				break;
+			case 3:
+				context.fillStyle = "#1D6";
+				break;
+			case 4:
+				context.fillStyle = "#80F";
+				break;
+			case 5:
+				context.fillStyle = rgb(rainbowColour.r, rainbowColour.g, rainbowColour.b);
+				break;
+		}
+		
 		context.fillRect(this.x,this.y,this.width,this.height);
 	}
     
@@ -261,11 +292,19 @@ var
 	
 	//Array for all bricks
 	brickArray = [],
-	brickPositions =
+	brickPositions =	//11, then 10, and so on
     [
         new vector2(80,40), new vector2(140,40), new vector2(200,40), new vector2(260,40), new vector2(320,40), new vector2(380,40),  new vector2(440,40), new vector2(500,40), new vector2(560,40), new vector2(620,40), new vector2(680,40),
-        new vector2(105,65), new vector2(165,65), new vector2(225,65), new vector2(285,65), new vector2(345,65), new vector2(405,65), new vector2(465,65), new vector2(525,65), new vector2(585,65), new vector2(645,65)
+        new vector2(105,65), new vector2(165,65), new vector2(225,65), new vector2(285,65), new vector2(345,65), new vector2(405,65), new vector2(465,65), new vector2(525,65), new vector2(585,65), new vector2(645,65),
+		new vector2(80,90), new vector2(140,90), new vector2(200,90), new vector2(260,90), new vector2(320,90), new vector2(380,90),  new vector2(440,90), new vector2(500,90), new vector2(560,90), new vector2(620,90), new vector2(680,90)
     ],
+	brickStates =
+	[
+		1,2,1,2,1,2,1,2,1,2,1,
+		 3,3,4,4,5,5,4,4,3,3,
+		1,2,1,2,1,2,1,2,1,2,1
+	],
+	
     		
 	//buttons
 	buttonLeft = new button(0, 0, WIDTH/2, HEIGHT, null, "LEFT", function(bool)
@@ -362,9 +401,12 @@ var
 			this.y = paddle.y - 20;
 
 			//generate random x val for the direction vector
-			//var r = Math.random();
+			var r;
+			if (Math.random() < 0.5)
+				r = -1;
+			else r = 1;
 
-			this.setDirection(1,-1);
+			this.setDirection(r,-1);
 		},
 
 		update: function()
@@ -709,9 +751,10 @@ function init()
 	paddle.y = HEIGHT - 60;
 	ball.serve();
     
+	//loop through brick position array, create all objects, add them to the appropriate array and set states
     for (var i = 0; i < brickPositions.length; i++)
     {
-        var newBrick = new brick(brickPositions[i], 0);
+        var newBrick = new brick(brickPositions[i], brickStates[i]);
         brickArray.push(newBrick);
     }
 }
