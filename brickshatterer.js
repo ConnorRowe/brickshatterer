@@ -376,7 +376,10 @@ var
 							  this.x, this.y, this.side, this.side))
 			{
 				this.iscolliding = true;
-				this.setReflectNormal(calcCollisionNormal(this.x + this.side/2, this.y + this.side/2, paddle.x + paddle.width/2, paddle.y + paddle.height/2, paddle.width, paddle.height));
+				var newNormal = calcCollisionNormal(this.x + this.side/2, this.y + this.side/2, paddle.x + paddle.width/2, paddle.y + paddle.height/2, paddle.width, paddle.height);
+				if (newNormal != undefined)
+					newNormal.x += paddle.velocity*0.2;
+				this.setReflectNormal(newNormal);
 			}
             
             //brick collision
@@ -387,9 +390,10 @@ var
                 if (AABBIntersect(brick.x, brick.y, brick.width, brick.height,
                                   this.x,  this.y,   this.side,    this.side))
                 {
-                    this.iscolliding = true;
+                    if (!this.iscolliding)
+						brick.collide(i);
+					this.iscolliding = true;
 				    this.setReflectNormal(calcCollisionNormal(this.x + this.side/2, this.y + this.side/2, brick.x + brick.width/2, brick.y + brick.height/2, brick.width, brick.height));
-					brick.collide(i);
                 }
             }
             
