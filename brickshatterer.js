@@ -188,7 +188,7 @@ class button
 
 class brick
 {
-	constructor(position,type)
+	constructor(position,state)
 	{
 		this.x = position.x;
 		this.y = position.y;
@@ -297,15 +297,19 @@ var
 			//Input
 			if (moveLeft || moveRight)
 			{
-				if(moveLeft)
+				if (!AABBIntersect(this.x,	this.y,	this.width,	this.height,
+							  	   ball.x, 	ball.y, ball.side, 	ball.side))
 				{
-					this.x -= (deltaTime * 0.5);
-					this.velocity = -1;
-				}
-				if(moveRight)
-				{
-					this.x += (deltaTime * 0.5);
-					this.velocity = 1;
+					if(moveLeft)
+					{
+						this.x -= (deltaTime * 0.5);
+						this.velocity = -1;
+					}
+					if(moveRight)
+					{
+						this.x += (deltaTime * 0.5);
+						this.velocity = 1;
+					}
 				}
 			}
 			else this.velocity = 0;
@@ -325,6 +329,8 @@ var
 	{
 		x: null,
 		y: null,
+		prevX: null,
+		prevY: null,
 		direction: new vector2(0,0),
 		side: 20,
 		speed: 3,
@@ -332,6 +338,7 @@ var
 		canCollide: true,
 		reflectNormal: new vector2(0,0),
 		collideTimer: new timer(),
+		collideFlag: "",
 
 		setReflectNormal: function(v)
 		{
@@ -362,6 +369,9 @@ var
 
 		update: function()
 		{
+            this.prevX = this.x;
+			this.prevY = this.y;
+			
 			//update position with the direction and speed
 			if (!this.iscolliding)
 			{
@@ -369,17 +379,24 @@ var
 				this.y += (this.direction.y) * this.speed;
 			}
 			
-            <!-- Collision Checks ----------------------------------------------------------------------------------------------------------------------------------------------------->
-            
+			<!-- Collision Checks ----------------------------------------------------------------------------------------------------------------------------------------------------->
+
             //paddle collision
 			if (AABBIntersect(paddle.x,paddle.y,paddle.width,paddle.height,
 							  this.x, this.y, this.side, this.side))
 			{
-				this.iscolliding = true;
-				var newNormal = calcCollisionNormal(this.x + this.side/2, this.y + this.side/2, paddle.x + paddle.width/2, paddle.y + paddle.height/2, paddle.width, paddle.height);
-				if (newNormal != undefined)
-					newNormal.x += paddle.velocity*0.2;
-				this.setReflectNormal(newNormal);
+				
+				if (true)
+				{
+					this.iscolliding = true;
+					var newNormal = calcCollisionNormal(this.x + this.side/2, this.y + this.side/2, paddle.x + paddle.width/2, paddle.y + paddle.height/2, paddle.width, paddle.height);
+					if (newNormal != undefined)
+					{
+						newNormal.x += paddle.velocity*0.2;
+						this.setReflectNormal(newNormal.normalise());
+					}
+				}
+				this.collideFlag = "paddle";
 			}
             
             //brick collision
@@ -426,6 +443,8 @@ var
 					this.direction = calcReflectedVector(this.direction, this.reflectNormal);
 					this.canCollide = false;
 					this.iscolliding = false;
+					this.x = this.prevX;
+					this.y = this.prevY;
 				}
 			}
 			else
@@ -442,7 +461,6 @@ var
 			{
 				this.serve();
 			}
-
 		},
 
 		//drawing the ball
