@@ -808,6 +808,11 @@ function updateMobCanvasSize()
 	
 	canvas.width = WIDTH;
 	canvas.height = HEIGHT;
+	buttonLeft.width = WIDTH/2;
+	buttonLeft.height = HEIGHT;
+	buttonRight.x = WIDTH/2;
+	buttonRight.width = WIDTH/2;
+	buttonRight.height = HEIGHT;
 }
 
 <!-- Main game stuff --------------------------------------------------------------------------------------------------------------->
