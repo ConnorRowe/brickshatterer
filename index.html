@@ -12,19 +12,22 @@
 				bottom: 0;
 				left: 0;
 				right: 0;
-				-webkit-touch-callout: none;
-				-webkit-user-select: none;
-				-khtml-user-select: none;
-				-moz-user-select: none;
-				-ms-user-select: none;
-				user-select: none;
-				outline: none;
+			}
+			
+			.noselect {
+				-webkit-touch-callout: none; 	/* iOS Safari */
+				-webkit-user-select: none; 		/* Safari */
+				-khtml-user-select: none; 		/* Konqueror HTML */
+				-moz-user-select: none; 		/* Firefox */
+				-ms-user-select: none; 			/* Internet Explorer/Edge */
+				user-select: none; 				/* Non-prefixed version, currently
+											  	   supported by Chrome and Opera */
 				-webkit-tap-highlight-color: rgba(255, 255, 255, 0); /* mobile webkit */
 			}
 		</style>
 	</head>
 		
-	<body>
+	<body class="noselect">
 		<script type="text/javascript" src="brickshatterer.js"></script>
 		<h1>Controls: </h1>
 		<h2>A - move left <br>D - move right <br>
