@@ -584,6 +584,13 @@ function Main()
 		clientX = null;
 		clientY = null;
 	}, false);
+	
+	document.addEventListener("select", function(evt)
+	{
+		//disable selection
+		event.preventDefault();
+		event.stopPropagation();
+	})
 
 	init(); //initialise game objects
 
