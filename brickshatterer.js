@@ -431,9 +431,12 @@ var
 
 					this.isColliding = true;
 					var newNormal = calcCollisionNormal(this.x + this.side/2, this.y + this.side/2, paddle.x + paddle.width/2, paddle.y + paddle.height/2, paddle.width, paddle.height);
+					
 					if (newNormal != undefined)
 					{
-						newNormal.x += paddle.velocity*0.2;
+						if(this.y > paddle.y)
+							newNormal.x += paddle.velocity*0.2; //	imparts some x velocity of the paddle onto the ball direction
+						
 						this.setReflectNormal(newNormal.normalise());
 					}
 					this.isPaddleCollision = true;
