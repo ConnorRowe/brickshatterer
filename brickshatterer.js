@@ -373,11 +373,11 @@ var
 		direction: new vector2(0,0),
 		side: 20,
 		speed: 3,
-		iscolliding: false,
-		canCollide: true,
+		isColliding: false,
+		canCollidePaddle: true,
+		isPaddleCollision: false,
 		reflectNormal: new vector2(0,0),
 		collideTimer: new timer(),
-		collideFlag: "",
 
 		setReflectNormal: function(v)
 		{
@@ -415,30 +415,29 @@ var
 			this.prevY = this.y;
 			
 			//update position with the direction and speed
-			if (!this.iscolliding)
-			{
-				this.x += (this.direction.x) * this.speed;
-				this.y += (this.direction.y) * this.speed;
-			}
+			this.x += (this.direction.x) * this.speed;
+			this.y += (this.direction.y) * this.speed;
 			
 			<!-- Collision Checks ----------------------------------------------------------------------------------------------------------------------------------------------------->
-
+			
             //paddle collision
-			if (AABBIntersect(paddle.x,paddle.y,paddle.width,paddle.height,
-							  this.x, this.y, this.side, this.side))
+			if(this.canCollidePaddle)
 			{
+				this.collideTimer.reset();
 				
-				if (true)
+				if (AABBIntersect(paddle.x,paddle.y,paddle.width,paddle.height,
+								  this.x, this.y, this.side, this.side))
 				{
-					this.iscolliding = true;
+
+					this.isColliding = true;
 					var newNormal = calcCollisionNormal(this.x + this.side/2, this.y + this.side/2, paddle.x + paddle.width/2, paddle.y + paddle.height/2, paddle.width, paddle.height);
 					if (newNormal != undefined)
 					{
 						newNormal.x += paddle.velocity*0.2;
 						this.setReflectNormal(newNormal.normalise());
 					}
+					this.isPaddleCollision = true;
 				}
-				this.collideFlag = "paddle";
 			}
             
             //brick collision
@@ -449,9 +448,9 @@ var
                 if (AABBIntersect(brick.x, brick.y, brick.width, brick.height,
                                   this.x,  this.y,   this.side,    this.side))
                 {
-                    if (!this.iscolliding)
+                    if (!this.isColliding)
 						brick.collide(i);
-					this.iscolliding = true;
+					this.isColliding = true;
 				    this.setReflectNormal(calcCollisionNormal(this.x + this.side/2, this.y + this.side/2, brick.x + brick.width/2, brick.y + brick.height/2, brick.width, brick.height));
                 }
             }
@@ -459,7 +458,7 @@ var
 			//Window collision
 			if (this.y < 1)                  		//Top
 			{
-				this.iscolliding = true;
+				this.isColliding = true;
 				this.setReflectNormal(new vector2(0,1));
 			}
 			else if (this.y >= HEIGHT)    			//Bottom
@@ -468,35 +467,41 @@ var
 			}
 			else if (this.x < 1)             		//Left
 			{
-				this.iscolliding = true;
+				this.isColliding = true;
 				this.setReflectNormal(new vector2(1,0));
 			}
 			else if (this.x >= WIDTH - ball.side)	//Right
 			{
-				this.iscolliding = true;
+				this.isColliding = true;
 				this.setReflectNormal(new vector2(-1,0));
 			}
 
 
-			if (this.canCollide)
+			
+			if (this.isColliding)
 			{
-				if (this.iscolliding)
+				if((this.isPaddleCollision && this.canCollidePaddle) || !this.isPaddleCollision)
 				{
 					this.direction = calcReflectedVector(this.direction, this.reflectNormal);
-					this.canCollide = false;
-					this.iscolliding = false;
-					this.x = this.prevX;
-					this.y = this.prevY;
+					this.isColliding = false;
+
+					if(this.isPaddleCollision)
+					{
+						this.canCollidePaddle = false;
+					}
 				}
 			}
-			else
+			
+			if (!this.canCollidePaddle)
 			{
-				if (this.collideTimer.stopwatch(.01))
+				if (this.collideTimer.stopwatch(1))
 				{
-					this.canCollide = true;
+					this.canCollidePaddle = true;
 				}
-				else this.canCollide = false;
+				else this.canCollidePaddle = false;
 			}
+			
+			this.isPaddleCollision = false;
 
 			//reset the ball when ball is outisde the canvas (bottom side)
 			if (this.y >= HEIGHT - this.side - 2)
