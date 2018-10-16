@@ -434,7 +434,7 @@ var
 					
 					if (newNormal != undefined)
 					{
-						if(this.y > paddle.y)
+						if(this.y < paddle.y)
 							newNormal.x += paddle.velocity*0.2; //	imparts some x velocity of the paddle onto the ball direction
 						
 						this.setReflectNormal(newNormal.normalise());
