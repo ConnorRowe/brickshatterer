@@ -255,9 +255,7 @@ class brick
 <!-- Global Vars -------------------------------------------------------------------------------------------------------------------------------------->
 //only need to declare 'var' once
 var
-	//delcared here are the CONSTANTS
-	WIDTH	= 800,
-	HEIGHT	= 450,
+	//CONTSTANTS
 	pi =  Math.PI, //so I don't have to type Math.PI;
 
 	//keycodes -> https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
@@ -277,22 +275,25 @@ var
 	moveRight = false,
 
 	//game elements
-	canvas,		//play area
-	context,	//we use context in JS to relate back to the object we use it in
-	keystate,	//check the defined keypress
+	WIDTH	= 800,	//canvas height
+	HEIGHT	= 450,	//canvas width
+	canvas,			//play area
+	context,		//we use context in JS to relate back to the object we use it in
+	keystate,		//check the defined keypress
+	isMob,			//if running on mobile
 
 	//timing
 	gameTime = 0,	//total time (in microseconds or something)
 	deltaTime = 0,	//time difference between last frames
 	time = 0,		//total time (in seconds)
 	timeFrac = 0,	//time remainder in seconds (0.0 - 1.0)
-	debugTimer = new timer(),
+	debugTimer = new timer(), //timer to handle debug toggle
 	
 	//<!-- Objects ---------------------------------------------------------------------------------------------------------------------------------->
 	
 	//Array for all bricks
 	brickArray = [],
-	brickPositions =	//11, then 10, and so on
+	brickPositions =	//11, then 10, and so on for brick pattern
     [
         new vector2(80,40), new vector2(140,40), new vector2(200,40), new vector2(260,40), new vector2(320,40), new vector2(380,40),  new vector2(440,40), new vector2(500,40), new vector2(560,40), new vector2(620,40), new vector2(680,40),
         new vector2(105,65), new vector2(165,65), new vector2(225,65), new vector2(285,65), new vector2(345,65), new vector2(405,65), new vector2(465,65), new vector2(525,65), new vector2(585,65), new vector2(645,65),
@@ -525,10 +526,17 @@ function Main()
 	// create, initiate and append the game canvas we create at the start
 	// we do this because if we dont give the canvas time to load,
 	// it wont appear on the page
+	isMob = detectMob();
 
 	canvas = document.createElement("canvas");
 	canvas.width = WIDTH;
 	canvas.height = HEIGHT;
+	
+	if(isMob)
+	{
+		updateMobCanvasSize();
+	}
+	
 	context = canvas.getContext("2d");
 	document.body.appendChild(canvas)
 
@@ -590,7 +598,20 @@ function Main()
 		//disable selection
 		event.preventDefault();
 		event.stopPropagation();
-	})
+	}, false);
+	
+	//resize mobile canvas size
+	document.addEventListener("orientationchange", function(evt)
+	{
+		if(isMob)
+			updateMobCanvasSize();
+	}, false);
+	
+	document.addEventListener("resize", function(evt)
+	{
+		if(isMob)
+			updateMobCanvasSize();
+	}, false);
 
 	init(); //initialise game objects
 
@@ -615,12 +636,12 @@ function Main()
 		
 		if(keystate[keyDebug])
 			if(debugTimer.stopwatch(1))
-				{
-					if(showDebug)
-						showDebug = false;
-					else
-						showDebug = true;
-				}
+			{
+				if(showDebug)
+					showDebug = false;
+				else
+					showDebug = true;
+			}
 
 		update();
 		draw();
@@ -758,6 +779,37 @@ function unitCircleFromAngle(centreX, centreY, theta, dist)
 	return newV;
 }
 
+function detectMob()
+{ 
+	if( navigator.userAgent.match(/Android/i)
+	 || navigator.userAgent.match(/webOS/i)
+	 || navigator.userAgent.match(/iPhone/i)
+	 || navigator.userAgent.match(/iPad/i)
+	 || navigator.userAgent.match(/iPod/i)
+	 || navigator.userAgent.match(/BlackBerry/i)
+	 || navigator.userAgent.match(/Windows Phone/i)
+ 	  )
+	{
+    	return true;
+	}
+	else
+	{
+    	return false;
+	}
+}
+
+function updateMobCanvasSize()
+{
+	var w = window.innerWidth;
+	var h = w*9/16;
+	
+	WIDTH = w;
+	HEIGHT = h;
+	
+	canvas.width = WIDTH;
+	canvas.height = HEIGHT;
+}
+
 <!-- Main game stuff --------------------------------------------------------------------------------------------------------------->
 
 function init()
@@ -765,7 +817,7 @@ function init()
 	paddle.x = WIDTH/2;
 	paddle.y = HEIGHT - 60;
 	ball.serve();
-    
+	
 	//loop through brick position array, create all objects, add them to the appropriate array and set states
     for (var i = 0; i < brickPositions.length; i++)
     {
