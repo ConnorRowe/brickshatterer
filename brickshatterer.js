@@ -190,13 +190,14 @@ class brick
 {
 	constructor(position,state)
 	{
-		this.x = position.x;
-		this.y = position.y;
-		this.width = 50;
-		this.height = 15;
+		this.x = WIDTH*position.x;
+		this.y = WIDTH*position.y;
+		this.width = WIDTH*0.040;
+		this.height = WIDTH*0.015;
 		this.state = state;
         this.hitFlag = false;
 		this.id = null;
+		this.collideTimer = new timer();
 	}
 	
 	update()
@@ -247,8 +248,12 @@ class brick
     
     collide(id)
     {
-        this.hitFlag = true;
-		this.id = id;
+        if (this.collideTimer.stopwatch(.05))
+		{
+			this.hitFlag = true;
+			this.id = id;
+			this.collideTimer.reset();
+		}
     }
 }
 
@@ -275,8 +280,8 @@ var
 	moveRight = false,
 
 	//game elements
-	WIDTH	= 800,	//canvas height
-	HEIGHT	= 450,	//canvas width
+	WIDTH	= 1000,	//canvas height
+	HEIGHT	= WIDTH*9/16,	//canvas width
 	canvas,			//play area
 	context,		//we use context in JS to relate back to the object we use it in
 	keystate,		//check the defined keypress
@@ -293,17 +298,61 @@ var
 	
 	//Array for all bricks
 	brickArray = [],
-	brickPositions =	//11, then 10, and so on for brick pattern
+	
+	//brick position data is used as a multiplier to WIDTH / height
+	brickPositions =	//13, then 12, and so on for brick pattern
     [
-        new vector2(80,40), new vector2(140,40), new vector2(200,40), new vector2(260,40), new vector2(320,40), new vector2(380,40),  new vector2(440,40), new vector2(500,40), new vector2(560,40), new vector2(620,40), new vector2(680,40),
-        new vector2(105,65), new vector2(165,65), new vector2(225,65), new vector2(285,65), new vector2(345,65), new vector2(405,65), new vector2(465,65), new vector2(525,65), new vector2(585,65), new vector2(645,65),
-		new vector2(80,90), new vector2(140,90), new vector2(200,90), new vector2(260,90), new vector2(320,90), new vector2(380,90),  new vector2(440,90), new vector2(500,90), new vector2(560,90), new vector2(620,90), new vector2(680,90)
+        new vector2(.07,.06), new vector2(.14,.06), new vector2(.21,.06), new vector2(.28,.06), new vector2(.35,.06), new vector2(.42,.06), new vector2(.49,.06), new vector2(.56,.06), new vector2(.63,.06), new vector2(.70,.06), new vector2(.77,.06), new vector2(.84,.06), new vector2(.91,.06),
+		new vector2(.10,.105), new vector2(.17,.105), new vector2(.24,.105), new vector2(.31,.105), new vector2(.38,.105), new vector2(.45,.105), new vector2(.52,.105), new vector2(.59,.105), new vector2(.66,.105), new vector2(.73,.105), new vector2(.80,.105), new vector2(.87,.105), 
+		new vector2(.07,.16), new vector2(.14,.16), new vector2(.21,.16), new vector2(.28,.16), new vector2(.35,.16), new vector2(.42,.16), new vector2(.49,.16), new vector2(.56,.16), new vector2(.63,.16), new vector2(.70,.16), new vector2(.77,.16), new vector2(.84,.16), new vector2(.91,.16),
+		new vector2(.10,.2125), new vector2(.17,.2125), new vector2(.24,.2125), new vector2(.31,.2125), new vector2(.38,.2125), new vector2(.45,.2125), new vector2(.52,.2125), new vector2(.59,.2125), new vector2(.66,.2125), new vector2(.73,.2125), new vector2(.80,.2125), new vector2(.87,.2125), 
     ],
+	
+	brickPositionsName =
+	[
+		new vector2(.04,.165), new vector2(.08,.165), new vector2(.12,.165), new vector2(.20,.165), new vector2(.24,.165), new vector2(.28,.165), new vector2(.36,.165), new vector2(.40,.165), new vector2(.44,.165), new vector2(.52,.165), new vector2(.56,.165), new vector2(.60,.165), new vector2(.68,.165), new vector2(.72,.165), new vector2(.76,.165), new vector2(.84,.165), new vector2(.88,.165), new vector2(.92,.165), 
+		
+		new vector2(.04,.18), new vector2(.20,.18), new vector2(.28,.18), new vector2(.36,.18), new vector2(.44,.18), new vector2(.52,.18), new vector2(.60,.18), new vector2(.68,.18), new vector2(.76,.18), new vector2(.84,.18), new vector2(.92,.18), 
+		
+		new vector2(.04,.195), new vector2(.20,.195), new vector2(.28,.195), new vector2(.36,.195), new vector2(.44,.195), new vector2(.52,.195), new vector2(.60,.195), new vector2(.68,.195), new vector2(.76,.195), new vector2(.84,.195), new vector2(.88,.195), 
+		
+		new vector2(.04,.21), new vector2(.20,.21), new vector2(.28,.21), new vector2(.36,.21), new vector2(.44,.21), new vector2(.52,.21), new vector2(.60,.21), new vector2(.68,.21), new vector2(.76,.21), new vector2(.84,.21), new vector2(.92,.21), 
+		
+		new vector2(.04,.225), new vector2(.08,.225), new vector2(.12,.225), new vector2(.20,.225), new vector2(.24,.225), new vector2(.28,.225), new vector2(.36,.225), new vector2(.44,.225), new vector2(.52,.225), new vector2(.60,.225), new vector2(.68,.225), new vector2(.72,.225), new vector2(.76,.225), new vector2(.84,.225), new vector2(.92,.225), 
+		
+		new vector2(.04,.27), new vector2(.08,.27), new vector2(.12,.27), new vector2(.20,.27), new vector2(.24,.27), new vector2(.28,.27), new vector2(.36,.27), new vector2(.40,.27), new vector2(.44,.27), new vector2(.52,.27), new vector2(.56,.27), new vector2(.68,.27), new vector2(.76,.27), new vector2(.84,.27), new vector2(.88,.27), new vector2(.92,.27), 
+		
+		new vector2(.04,.285), new vector2(.20,.285), new vector2(.36,.285), new vector2(.52,.285), new vector2(.60,.285), new vector2(.68,.285), new vector2(.76,.285), new vector2(.84,.285), new vector2(.92,.285),
+		
+		new vector2(.04,.30), new vector2(.08,.30), new vector2(.12,.30), new vector2(.20,.30), new vector2(.24,.30), new vector2(.28,.30), new vector2(.36,.30), new vector2(.44,.30), new vector2(.52,.30), new vector2(.60,.30), new vector2(.76,.30), new vector2(.84,.30), new vector2(.88,.30), new vector2(.92,.30), 
+		
+		new vector2(.12,.315), new vector2(.20,.315), new vector2(.36,.315), new vector2(.44,.315), new vector2(.52,.315), new vector2(.60,.315), new vector2(.76,.315), new vector2(.84,.315), new vector2(.92,.315), 
+		
+		new vector2(.04,.33), new vector2(.08,.33), new vector2(.12,.33), new vector2(.20,.33), new vector2(.24,.33), new vector2(.28,.33), new vector2(.36,.33), new vector2(.40,.33), new vector2(.44,.33), new vector2(.52,.33), new vector2(.56,.33), new vector2(.76,.33), new vector2(.84,.33), new vector2(.88,.33), new vector2(.92,.33)
+	],
+	
 	brickStates =
 	[
-		1,2,1,2,1,2,1,2,1,2,1,
-		 3,3,4,4,5,5,4,4,3,3,
-		1,2,1,2,1,2,1,2,1,2,1
+		5,4,5,4,5,4,5,4,5,4,5,4,5,
+		 4,3,4,3,4,3,4,3,4,3,4,3,
+		3,2,3,2,3,2,3,2,3,2,3,2,3,
+		 2,1,2,1,2,1,2,1,2,1,2,1
+	],
+	
+	brickStatesName =
+	[
+		5,5,5, 3,3,3, 4,4,4, 4,4,4, 3,3,3, 2,2,2,
+		5,     3,  3, 4,  4, 4,  4, 3,  3, 2,  2,
+		5,     3,  3, 4,  4, 4,  4, 3,  3, 2,2,
+		5,     3,  3, 4,  4, 4,  4, 3,  3, 2,  2,
+		5,5,5, 3,3,3, 4,  4, 4,  4, 3,3,3, 2,  2,
+	
+		2,2,2, 1,1,1, 2,2,2, 1,1,   5,  1, 5,5,5,
+		2,     1,     2,     1,  1, 5,  1, 5,  5,
+		2,2,2, 1,1,1, 2,  2, 1,  1,     1, 5,5,5,
+		    2, 1,     2,  2, 1,  1,     1, 5,  5,
+		2,2,2, 1,1,1, 2,2,2, 1,1,       1, 5,5,5		
+
 	],
 	
     		
@@ -328,8 +377,8 @@ var
 	{
 		x: null,	//coords
 		y: null,
-		width: 80,	//sizing
-		height: 10,
+		width: WIDTH*0.080,	//sizing
+		height: WIDTH*0.015,
 		velocity: 0,
 
 		update: function()
@@ -342,12 +391,12 @@ var
 				{
 					if(moveLeft)
 					{
-						this.x -= (deltaTime * 0.5);
+						this.x -= (deltaTime * WIDTH * 0.0005);
 						this.velocity = -1;
 					}
 					if(moveRight)
 					{
-						this.x += (deltaTime * 0.5);
+						this.x += (deltaTime * WIDTH * 0.0005);
 						this.velocity = 1;
 					}
 				}
@@ -372,8 +421,8 @@ var
 		prevX: null,
 		prevY: null,
 		direction: new vector2(0,0),
-		side: 20,
-		speed: 3,
+		side: WIDTH*0.015,
+		speed: WIDTH*0.003,
 		isColliding: false,
 		canCollidePaddle: true,
 		isPaddleCollision: false,
@@ -399,7 +448,7 @@ var
 		serve: function()
 		{
 			this.x = paddle.x + (paddle.width/2);
-			this.y = paddle.y - 20;
+			this.y = paddle.y - paddle.height*1.5;
 
 			//generate random x val for the direction vector
 			var r;
@@ -823,13 +872,13 @@ function updateMobCanvasSize()
 function init()
 {
 	paddle.x = WIDTH/2;
-	paddle.y = HEIGHT - 60;
+	paddle.y = HEIGHT - WIDTH*0.060;
 	ball.serve();
 	
 	//loop through brick position array, create all objects, add them to the appropriate array and set states
-    for (var i = 0; i < brickPositions.length; i++)
+    for (var i = 0; i < brickPositionsName.length; i++)
     {
-        var newBrick = new brick(brickPositions[i], brickStates[i]);
+        var newBrick = new brick(brickPositionsName[i], brickStatesName[i]);
         brickArray.push(newBrick);
     }
 }
@@ -896,4 +945,3 @@ function draw()
 }
 
 Main();
-
