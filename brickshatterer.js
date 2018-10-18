@@ -193,7 +193,7 @@ class brick
 		this.x = WIDTH*position.x;
 		this.y = WIDTH*position.y;
 		this.width = WIDTH*0.040;
-		this.height = WIDTH*0.015;
+		this.height = WIDTH*0.016;
 		this.state = state;
         this.hitFlag = false;
 		this.id = null;
@@ -310,25 +310,25 @@ var
 	
 	brickPositionsName =
 	[
-		new vector2(.04,.165), new vector2(.08,.165), new vector2(.12,.165), new vector2(.20,.165), new vector2(.24,.165), new vector2(.28,.165), new vector2(.36,.165), new vector2(.40,.165), new vector2(.44,.165), new vector2(.52,.165), new vector2(.56,.165), new vector2(.60,.165), new vector2(.68,.165), new vector2(.72,.165), new vector2(.76,.165), new vector2(.84,.165), new vector2(.88,.165), new vector2(.92,.165), 
+		new vector2(.04,.048), new vector2(.08,.048), new vector2(.12,.048), new vector2(.20,.048), new vector2(.24,.048), new vector2(.28,.048), new vector2(.36,.048), new vector2(.40,.048), new vector2(.44,.048), new vector2(.52,.048), new vector2(.56,.048), new vector2(.60,.048), new vector2(.68,.048), new vector2(.72,.048), new vector2(.76,.048), new vector2(.84,.048), new vector2(.88,.048), new vector2(.92,.048), 
 		
-		new vector2(.04,.18), new vector2(.20,.18), new vector2(.28,.18), new vector2(.36,.18), new vector2(.44,.18), new vector2(.52,.18), new vector2(.60,.18), new vector2(.68,.18), new vector2(.76,.18), new vector2(.84,.18), new vector2(.92,.18), 
+		new vector2(.04,.064), new vector2(.20,.064), new vector2(.28,.064), new vector2(.36,.064), new vector2(.44,.064), new vector2(.52,.064), new vector2(.60,.064), new vector2(.68,.064), new vector2(.76,.064), new vector2(.84,.064), new vector2(.92,.064), 
 		
-		new vector2(.04,.195), new vector2(.20,.195), new vector2(.28,.195), new vector2(.36,.195), new vector2(.44,.195), new vector2(.52,.195), new vector2(.60,.195), new vector2(.68,.195), new vector2(.76,.195), new vector2(.84,.195), new vector2(.88,.195), 
+		new vector2(.04,.080), new vector2(.20,.080), new vector2(.28,.080), new vector2(.36,.080), new vector2(.44,.080), new vector2(.52,.080), new vector2(.60,.080), new vector2(.68,.080), new vector2(.76,.080), new vector2(.84,.080), new vector2(.88,.080), 
 		
-		new vector2(.04,.21), new vector2(.20,.21), new vector2(.28,.21), new vector2(.36,.21), new vector2(.44,.21), new vector2(.52,.21), new vector2(.60,.21), new vector2(.68,.21), new vector2(.76,.21), new vector2(.84,.21), new vector2(.92,.21), 
+		new vector2(.04,.096), new vector2(.20,.096), new vector2(.28,.096), new vector2(.36,.096), new vector2(.44,.096), new vector2(.52,.096), new vector2(.60,.096), new vector2(.68,.096), new vector2(.76,.096), new vector2(.84,.096), new vector2(.92,.096), 
 		
-		new vector2(.04,.225), new vector2(.08,.225), new vector2(.12,.225), new vector2(.20,.225), new vector2(.24,.225), new vector2(.28,.225), new vector2(.36,.225), new vector2(.44,.225), new vector2(.52,.225), new vector2(.60,.225), new vector2(.68,.225), new vector2(.72,.225), new vector2(.76,.225), new vector2(.84,.225), new vector2(.92,.225), 
+		new vector2(.04,.112), new vector2(.08,.112), new vector2(.12,.112), new vector2(.20,.112), new vector2(.24,.112), new vector2(.28,.112), new vector2(.36,.112), new vector2(.44,.112), new vector2(.52,.112), new vector2(.60,.112), new vector2(.68,.112), new vector2(.72,.112), new vector2(.76,.112), new vector2(.84,.112), new vector2(.92,.112), 
 		
-		new vector2(.04,.27), new vector2(.08,.27), new vector2(.12,.27), new vector2(.20,.27), new vector2(.24,.27), new vector2(.28,.27), new vector2(.36,.27), new vector2(.40,.27), new vector2(.44,.27), new vector2(.52,.27), new vector2(.56,.27), new vector2(.68,.27), new vector2(.76,.27), new vector2(.84,.27), new vector2(.88,.27), new vector2(.92,.27), 
+		new vector2(.04,.160), new vector2(.08,.160), new vector2(.12,.160), new vector2(.20,.160), new vector2(.24,.160), new vector2(.28,.160), new vector2(.36,.160), new vector2(.40,.160), new vector2(.44,.160), new vector2(.52,.160), new vector2(.56,.160), new vector2(.68,.160), new vector2(.76,.160), new vector2(.84,.160), new vector2(.88,.160), new vector2(.92,.160), 
 		
-		new vector2(.04,.285), new vector2(.20,.285), new vector2(.36,.285), new vector2(.52,.285), new vector2(.60,.285), new vector2(.68,.285), new vector2(.76,.285), new vector2(.84,.285), new vector2(.92,.285),
+		new vector2(.04,.176), new vector2(.20,.176), new vector2(.36,.176), new vector2(.52,.176), new vector2(.60,.176), new vector2(.68,.176), new vector2(.76,.176), new vector2(.84,.176), new vector2(.92,.176),
 		
-		new vector2(.04,.30), new vector2(.08,.30), new vector2(.12,.30), new vector2(.20,.30), new vector2(.24,.30), new vector2(.28,.30), new vector2(.36,.30), new vector2(.44,.30), new vector2(.52,.30), new vector2(.60,.30), new vector2(.76,.30), new vector2(.84,.30), new vector2(.88,.30), new vector2(.92,.30), 
+		new vector2(.04,.192), new vector2(.08,.192), new vector2(.12,.192), new vector2(.20,.192), new vector2(.24,.192), new vector2(.28,.192), new vector2(.36,.192), new vector2(.44,.192), new vector2(.52,.192), new vector2(.60,.192), new vector2(.76,.192), new vector2(.84,.192), new vector2(.88,.192), new vector2(.92,.192), 
 		
-		new vector2(.12,.315), new vector2(.20,.315), new vector2(.36,.315), new vector2(.44,.315), new vector2(.52,.315), new vector2(.60,.315), new vector2(.76,.315), new vector2(.84,.315), new vector2(.92,.315), 
+		new vector2(.12,.208), new vector2(.20,.208), new vector2(.36,.208), new vector2(.44,.208), new vector2(.52,.208), new vector2(.60,.208), new vector2(.76,.208), new vector2(.84,.208), new vector2(.92,.208), 
 		
-		new vector2(.04,.33), new vector2(.08,.33), new vector2(.12,.33), new vector2(.20,.33), new vector2(.24,.33), new vector2(.28,.33), new vector2(.36,.33), new vector2(.40,.33), new vector2(.44,.33), new vector2(.52,.33), new vector2(.56,.33), new vector2(.76,.33), new vector2(.84,.33), new vector2(.88,.33), new vector2(.92,.33)
+		new vector2(.04,.224), new vector2(.08,.224), new vector2(.12,.224), new vector2(.20,.224), new vector2(.24,.224), new vector2(.28,.224), new vector2(.36,.224), new vector2(.40,.224), new vector2(.44,.224), new vector2(.52,.224), new vector2(.56,.224), new vector2(.76,.224), new vector2(.84,.224), new vector2(.88,.224), new vector2(.92,.224)
 	],
 	
 	brickStates =
