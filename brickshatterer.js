@@ -217,33 +217,40 @@ class brick
         }
 	}
 	
-	draw()
+	draw(shouldColour)
 	{
 		var rainbowColour = HSVtoRGB(lerp(0,1,timeFrac),1,1);
 		
-		switch (this.state)
+		if(shouldColour)
 		{
-			case 0:
-				context.fillStyle = "#000";
-				break;
-			case 1:
-				context.fillStyle = "#C40";
-				break;
-			case 2:
-				context.fillStyle = "#16F";
-				break;
-			case 3:
-				context.fillStyle = "#1D6";
-				break;
-			case 4:
-				context.fillStyle = "#80F";
-				break;
-			case 5:
-				context.fillStyle = rgb(rainbowColour.r, rainbowColour.g, rainbowColour.b);
-				break;
+			switch (this.state)
+			{				
+				case 0:
+					context.fillStyle = "#000";
+					break;
+				case 1:
+					context.fillStyle = "#C40";
+					break;
+				case 2:
+					context.fillStyle = "#16F";
+					break;
+				case 3:
+					context.fillStyle = "#1D6";
+					break;
+				case 4:
+					context.fillStyle = "#80F";
+					break;
+				case 5:
+					context.fillStyle = rgb(rainbowColour.r, rainbowColour.g, rainbowColour.b);
+					break;
+			}
+			context.fillRect(this.x,this.y,this.width,this.height);
 		}
-		
-		context.fillRect(this.x,this.y,this.width,this.height);
+		else
+		{
+			
+			context.drawImage(imgBrick, this.x, this.y);
+		}
 	}
     
     collide(id)
@@ -286,6 +293,11 @@ var
 	context,		//we use context in JS to relate back to the object we use it in
 	keystate,		//check the defined keypress
 	isMob,			//if running on mobile
+	
+	//Image objects
+	imgBrick = new Image(),
+	imgPaddle = new Image(),
+	imgBall = new Image(),
 
 	//timing
 	gameTime = 0,	//total time (in microseconds or something)
@@ -378,7 +390,7 @@ var
 		x: null,	//coords
 		y: null,
 		width: WIDTH*0.080,	//sizing
-		height: WIDTH*0.015,
+		height: WIDTH*0.016,
 		velocity: 0,
 
 		update: function()
@@ -410,7 +422,7 @@ var
 
 		draw: function()
 		{
-			context.fillRect(this.x, this.y, this.width, this.height);
+			context.drawImage(imgPaddle, this.x, this.y, this.width, this.height);
 		}
 	},
 
@@ -421,7 +433,7 @@ var
 		prevX: null,
 		prevY: null,
 		direction: new vector2(0,0),
-		side: WIDTH*0.015,
+		side: WIDTH*0.016,
 		speed: WIDTH*0.003,
 		isColliding: false,
 		canCollidePaddle: true,
@@ -569,9 +581,15 @@ var
 		//drawing the ball
 		draw: function()
 		{
-			context.fillRect(this.x,this.y,this.side,this.side);
+			context.drawImage(imgBall, this.x, this.y, this.side, this.side);
 		}
 	}
+
+//Loading image sources
+imgBrick.src 	= "images/T_Brick.bmp";
+imgPaddle.src 	= "images/T_Paddle.bmp";
+imgBall.src		= "images/T_Ball.bmp";
+
 
 function Main()
 {
@@ -590,8 +608,9 @@ function Main()
 	}
 	
 	context = canvas.getContext("2d");
-	document.body.appendChild(canvas)
-
+	document.body.appendChild(canvas);
+	
+	
 	keystate = {};
 
 	// these listeners will keep track of keyboard presses
@@ -904,11 +923,11 @@ function draw()
 	// draw the canvas
 	context.fillRect(0,0, WIDTH, HEIGHT);
 	context.save();
-
-	var boxColour = HSVtoRGB(lerp(0,1,timeFrac),1,1);
+	
+	context.msImageSmoothingEnabled = false;
+	context.imageSmoothingEnabled = false;
 	
 	//draw objects
-	context.fillStyle = rgb(boxColour.r,boxColour.g,boxColour.b);	//rainbow draw colour
 	paddle.draw();
 	context.fillStyle = "#FFF"; //white draw colour
 	ball.draw();
@@ -918,17 +937,24 @@ function draw()
 	//draw all bricks in array
 	for (var i = 0; i < brickArray.length; i++)
 	{
-		brickArray[i].draw();
+		brickArray[i].draw(false);
 	}
 	
-	context.fillStyle = "#FFF";	//white draw colour
-	context.strokeStyle="#FF0000";
+	context.globalCompositeOperation = 'color';
+	for (var i = 0; i < brickArray.length; i++)
+	{
+		brickArray[i].draw(true);
+	}
+	
+	context.fillStyle = "#F00";	//white draw colour
+	context.strokeStyle="#F00";
 	//text for the stuff
-	context.font = "16px Calibri"; //size and font
+	context.font = "12px Courier New"; //size and font
 	
 	//draw debug text
 	if(showDebug)
 	{
+		context.globalCompositeOperation = 'source-over';
 		context.fillText(Math.ceil(1000/deltaTime) + " FPS", 10, 25);
 		context.fillText("deltaTime: " + deltaTime, 10, 50);
 		context.fillText("time: " + time, 10, 75);
@@ -939,7 +965,6 @@ function draw()
 		var testVec2 = new vector2(0,1);
 		context.fillText(testVec1 + " -> " + testVec2 + "  reflection: " + calcReflectedVector(testVec1,testVec2) + " (testing reflection maths)", 10, 175);
 	}
-	
 	
 	context.restore();
 }
