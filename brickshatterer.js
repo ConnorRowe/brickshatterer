@@ -294,10 +294,18 @@ var
 	keystate,		//check the defined keypress
 	isMob,			//if running on mobile
 	
+	//Game states
+	gameState	= 1,
+	STATE_TITLE	= 1,
+	STATE_GAME	= 2,
+	STATE_WIN	= 3,
+	STATE_LOSE	= 4,
+	
 	//Image objects
 	imgBrick = new Image(),
 	imgPaddle = new Image(),
 	imgBall = new Image(),
+	imgStartBackground = new Image(),
 
 	//timing
 	gameTime = 0,	//total time (in microseconds or something)
@@ -369,6 +377,12 @@ var
 	
     		
 	//buttons
+	buttonStart = new button(0.2640625 * WIDTH, 0.321875 * WIDTH, 0.45625 * WIDTH, 0.096875 * WIDTH, null, "", function(bool)
+	{
+		if(bool)
+			gameState = STATE_GAME;
+	}),
+	
 	buttonLeft = new button(0, 0, WIDTH/2, HEIGHT, null, "LEFT", function(bool)
 	{
 		if(bool)
@@ -434,7 +448,7 @@ var
 		prevY: null,
 		direction: new vector2(0,0),
 		side: WIDTH*0.016,
-		speed: WIDTH*0.003,
+		speed: WIDTH*0.0035,
 		isColliding: false,
 		canCollidePaddle: true,
 		isPaddleCollision: false,
@@ -589,6 +603,7 @@ var
 imgBrick.src 	= "images/T_Brick.bmp";
 imgPaddle.src 	= "images/T_Paddle.bmp";
 imgBall.src		= "images/T_Ball.bmp";
+imgStartBackground.src = "images/BG_Start.bmp";
 
 
 function Main()
@@ -905,15 +920,33 @@ function init()
 //this is where we call to update all out objects
 function update()
 {
-	ball.update();
-	paddle.update();
-	buttonLeft.update();
-	buttonRight.update();
-	
-	//update all bricks in array
-	for (var i = 0; i < brickArray.length; i++)
+	if (gameState == STATE_TITLE)
 	{
-		brickArray[i].update();
+		buttonStart.update();
+	}
+	
+	if (gameState == STATE_GAME)
+	{
+		ball.update();
+		paddle.update();
+		buttonLeft.update();
+		buttonRight.update();
+
+		//update all bricks in array
+		for (var i = 0; i < brickArray.length; i++)
+		{
+			brickArray[i].update();
+		}
+	}
+	
+	if (gameState == STATE_WIN)
+	{
+		
+	}
+	
+	if (gameState == STATE_LOSE)
+	{
+		
 	}
 }
 
@@ -921,49 +954,69 @@ function update()
 function draw()
 {
 	// draw the canvas
+	context.fillStyle = "#111";
 	context.fillRect(0,0, WIDTH, HEIGHT);
 	context.save();
 	
 	context.msImageSmoothingEnabled = false;
 	context.imageSmoothingEnabled = false;
 	
-	//draw objects
-	paddle.draw();
-	context.fillStyle = "#FFF"; //white draw colour
-	ball.draw();
-	buttonLeft.draw();
-	buttonRight.draw();
-	
-	//draw all bricks in array
-	for (var i = 0; i < brickArray.length; i++)
+	if (gameState == STATE_TITLE)
 	{
-		brickArray[i].draw(false);
+		context.drawImage(imgStartBackground,0,0,WIDTH,HEIGHT);
 	}
 	
-	context.globalCompositeOperation = 'color';
-	for (var i = 0; i < brickArray.length; i++)
+	
+	if (gameState == STATE_GAME)
 	{
-		brickArray[i].draw(true);
+		//draw objects
+		paddle.draw();
+		context.fillStyle = "#FFF"; //white draw colour
+		ball.draw();
+		buttonLeft.draw();
+		buttonRight.draw();
+
+		//draw all bricks in array
+		for (var i = 0; i < brickArray.length; i++)
+		{
+			brickArray[i].draw(false);
+		}
+
+		context.globalCompositeOperation = 'color';
+		for (var i = 0; i < brickArray.length; i++)
+		{
+			brickArray[i].draw(true);
+		}
+
+		context.fillStyle = "#F00";	//white draw colour
+		context.strokeStyle="#F00";
+		//text for the stuff
+		context.font = "12px Courier New"; //size and font
+
+		//draw debug text
+		if(showDebug)
+		{
+			context.globalCompositeOperation = 'source-over';
+			context.fillText(Math.ceil(1000/deltaTime) + " FPS", 10, 25);
+			context.fillText("deltaTime: " + deltaTime, 10, 50);
+			context.fillText("time: " + time, 10, 75);
+			context.fillText("ball pos: x = " + (ball.x - ball.x % 1) + ", y = " + (ball.y - ball.y % 1), 10, 100);
+			context.fillText("ball direction: " + ball.direction, 10, 125);
+			context.fillText("clientX: " + clientX + ", clientY: " + clientY, 10, 150);
+			var testVec1 = new vector2(0,-1);
+			var testVec2 = new vector2(0,1);
+			context.fillText(testVec1 + " -> " + testVec2 + "  reflection: " + calcReflectedVector(testVec1,testVec2) + " (testing reflection maths)", 10, 175);
+		}
 	}
 	
-	context.fillStyle = "#F00";	//white draw colour
-	context.strokeStyle="#F00";
-	//text for the stuff
-	context.font = "12px Courier New"; //size and font
-	
-	//draw debug text
-	if(showDebug)
+	if (gameState == STATE_WIN)
 	{
-		context.globalCompositeOperation = 'source-over';
-		context.fillText(Math.ceil(1000/deltaTime) + " FPS", 10, 25);
-		context.fillText("deltaTime: " + deltaTime, 10, 50);
-		context.fillText("time: " + time, 10, 75);
-		context.fillText("ball pos: x = " + (ball.x - ball.x % 1) + ", y = " + (ball.y - ball.y % 1), 10, 100);
-		context.fillText("ball direction: " + ball.direction, 10, 125);
-		context.fillText("clientX: " + clientX + ", clientY: " + clientY, 10, 150);
-		var testVec1 = new vector2(0,-1);
-		var testVec2 = new vector2(0,1);
-		context.fillText(testVec1 + " -> " + testVec2 + "  reflection: " + calcReflectedVector(testVec1,testVec2) + " (testing reflection maths)", 10, 175);
+		
+	}
+	
+	if (gameState == STATE_LOSE)
+	{
+		
 	}
 	
 	context.restore();
