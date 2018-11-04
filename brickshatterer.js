@@ -306,6 +306,13 @@ var
 	imgPaddle = new Image(),
 	imgBall = new Image(),
 	imgStartBackground = new Image(),
+	
+	//Sound objects
+	sndBounce 	= new Audio('sfx/sfx_Bounce.wav'),
+	sndStart 	= new Audio('sfx/sfx_Start.wav'),
+	sndLose 	= new Audio('sfx/sfx_Lose.wav'),
+	sndTheme 	= new Audio('sfx/sfx_Theme.wav'),
+	sndGameLoop	= new Audio('sfx/sfx_GameLoop.wav'),
 
 	//timing
 	gameTime = 0,	//total time (in microseconds or something)
@@ -380,7 +387,10 @@ var
 	buttonStart = new button(0.2640625 * WIDTH, 0.321875 * WIDTH, 0.45625 * WIDTH, 0.096875 * WIDTH, null, "", function(bool)
 	{
 		if(bool)
+		{
 			gameState = STATE_GAME;
+			sndStart.play();
+		}
 	}),
 	
 	buttonLeft = new button(0, 0, WIDTH/2, HEIGHT, null, "LEFT", function(bool)
@@ -566,6 +576,10 @@ var
 				{
 					this.direction = calcReflectedVector(this.direction, this.reflectNormal);
 					this.isColliding = false;
+					
+					sndBounce.currentTime = 0;
+					sndBounce.play();
+					
 
 					if(this.isPaddleCollision)
 					{
@@ -915,6 +929,12 @@ function init()
         var newBrick = new brick(brickPositionsName[i], brickStatesName[i]);
         brickArray.push(newBrick);
     }
+	
+	sndBounce.volume = 0.5;
+	sndGameLoop.volume = 0.5;
+	sndLose.volume = 0.5;
+	sndStart.volume = 0.5;
+	sndTheme.volume = 0.5;
 }
 
 //this is where we call to update all out objects
@@ -923,6 +943,12 @@ function update()
 	if (gameState == STATE_TITLE)
 	{
 		buttonStart.update();
+		
+		if(sndTheme.paused)
+		{
+			sndTheme.loop = true;
+			sndTheme.play();
+		}
 	}
 	
 	if (gameState == STATE_GAME)
@@ -931,7 +957,14 @@ function update()
 		paddle.update();
 		buttonLeft.update();
 		buttonRight.update();
-
+		
+		if(sndGameLoop.paused)
+		{
+			sndGameLoop.loop = true;
+			sndGameLoop.play();
+			sndTheme.pause();
+		}
+		
 		//update all bricks in array
 		for (var i = 0; i < brickArray.length; i++)
 		{
