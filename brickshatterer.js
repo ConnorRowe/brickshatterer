@@ -249,7 +249,7 @@ class brick
 		else
 		{
 			
-			context.drawImage(imgBrick, this.x, this.y);
+			context.drawImage(imgBrick, this.x, this.y, this.width, this.height);
 		}
 	}
     
@@ -631,10 +631,7 @@ function Main()
 	canvas.width = WIDTH;
 	canvas.height = HEIGHT;
 	
-	if(isMob)
-	{
-		updateMobCanvasSize();
-	}
+	updateMobCanvasSize();
 	
 	context = canvas.getContext("2d");
 	document.body.appendChild(canvas);
@@ -683,7 +680,7 @@ function Main()
 		clientX = evt.clientX - 8;
 		clientY = evt.clientY - 8;
 
-		console.log("clientX:" + clientX-8 + ", clientY: " + clientY-8);
+		console.log("clientX:" + (clientX-8) + ", clientY: " + (clientY-8));
 	}, false);
 
 	document.addEventListener("mouseup", function(evt)
@@ -703,14 +700,12 @@ function Main()
 	//resize mobile canvas size
 	document.addEventListener("orientationchange", function(evt)
 	{
-		if(isMob)
-			updateMobCanvasSize();
+		updateMobCanvasSize();
 	}, false);
 	
-	document.addEventListener("resize", function(evt)
+	window.addEventListener("resize", function(evt)
 	{
-		if(isMob)
-			updateMobCanvasSize();
+		updateMobCanvasSize();
 	}, false);
 
 	init(); //initialise game objects
@@ -898,10 +893,21 @@ function detectMob()
 	}
 }
 
+//Recalculate positions and sizes of all objects in the game
 function updateMobCanvasSize()
 {
 	var w = window.innerWidth;
 	var h = w*9/16;
+	
+	paddle.x = (paddle.x / WIDTH) * w;
+	paddle.y = (paddle.y / WIDTH) * w;
+	paddle.width = 0.080 * w;
+	paddle.height = 0.016 * w;
+	
+	ball.x = (ball.x / WIDTH) * w;
+	ball.y = (ball.y / WIDTH) * w;
+	ball.side = 0.016 * w;
+	ball.speed = 0.0035 * w;
 	
 	WIDTH = w;
 	HEIGHT = h;
@@ -913,6 +919,22 @@ function updateMobCanvasSize()
 	buttonRight.x = WIDTH/2;
 	buttonRight.width = WIDTH/2;
 	buttonRight.height = HEIGHT;
+	
+	buttonStart.x = 0.2640625 * WIDTH;
+	buttonStart.y = 0.321875 * WIDTH;
+	buttonStart.width = 0.45625 * WIDTH;
+	buttonStart.height = 0.096875 * WIDTH;
+	
+	for (var i = 0; i < brickArray.length; i++)
+	{
+		var id = brickArray[i].id;
+		var upos = brickPositionsName[id];
+		brickArray[i].x = upos.x * WIDTH;
+		brickArray[i].y = upos.y * WIDTH;
+		brickArray[i].width = 0.040 * WIDTH;
+		brickArray[i].height = 0.016 * WIDTH;
+	}
+
 }
 
 <!-- Main game stuff --------------------------------------------------------------------------------------------------------------->
@@ -927,19 +949,20 @@ function init()
     for (var i = 0; i < brickPositionsName.length; i++)
     {
         var newBrick = new brick(brickPositionsName[i], brickStatesName[i]);
+		newBrick.id = i;
         brickArray.push(newBrick);
     }
 	
-	sndBounce.volume = 0.5;
-	sndGameLoop.volume = 0.5;
-	sndLose.volume = 0.5;
-	sndStart.volume = 0.5;
-	sndTheme.volume = 0.5;
+	sndBounce.volume = 0.3;
+	sndGameLoop.volume = 0.3;
+	sndLose.volume = 0.3;
+	sndStart.volume = 0.3;
+	sndTheme.volume = 0.3;
 }
 
 //this is where we call to update all out objects
 function update()
-{
+{	
 	if (gameState == STATE_TITLE)
 	{
 		buttonStart.update();
