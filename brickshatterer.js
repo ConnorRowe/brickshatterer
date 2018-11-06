@@ -306,8 +306,12 @@ var
 	imgPaddle = new Image(),
 	imgBall = new Image(),
 	imgStartBackground = new Image(),
+	imgMuted = new Image(),
+	imgUnmuted = new Image(),
 	
-	//Sound objects
+	//Sound
+	isMuted = false,
+	toggleMute = false,
 	sndBounce 	= new Audio('sfx/sfx_Bounce.wav'),
 	sndStart 	= new Audio('sfx/sfx_Start.wav'),
 	sndLose 	= new Audio('sfx/sfx_Lose.wav'),
@@ -320,6 +324,7 @@ var
 	time = 0,		//total time (in seconds)
 	timeFrac = 0,	//time remainder in seconds (0.0 - 1.0)
 	debugTimer = new timer(), //timer to handle debug toggle
+	muteTimer = new timer(), //same purpose but for mute
 	
 	//<!-- Objects ---------------------------------------------------------------------------------------------------------------------------------->
 	
@@ -407,6 +412,14 @@ var
 			touchRight = true;
 		else
 			touchRight = false;
+	}),
+	
+	buttonMute = new button(WIDTH/2, 0, WIDTH * 0.016, WIDTH * 0.016, null, "MUTE", function(bool)
+	{
+		if(bool)
+			toggleMute = true;
+		else
+			toggleMute = false;
 	}),
 	
 	paddle =
@@ -618,7 +631,8 @@ imgBrick.src 	= "images/T_Brick.bmp";
 imgPaddle.src 	= "images/T_Paddle.bmp";
 imgBall.src		= "images/T_Ball.bmp";
 imgStartBackground.src = "images/BG_Start.bmp";
-
+imgMuted.src = "images/T_Muted.gif";
+imgUnmuted.src = "images/T_Unmuted.gif";
 
 function Main()
 {
@@ -736,6 +750,29 @@ function Main()
 					showDebug = false;
 				else
 					showDebug = true;
+			}
+		
+		if(toggleMute)
+			if(muteTimer.stopwatch(.25))
+			{
+				if(isMuted)
+				{
+					isMuted = false;
+					sndBounce.volume = 0.3;
+					sndGameLoop.volume = 0.3;
+					sndLose.volume = 0.3;
+					sndStart.volume = 0.3;
+					sndTheme.volume = 0.3;
+				}
+				else
+				{
+					isMuted = true;
+					sndBounce.volume = 0;
+					sndGameLoop.volume = 0;
+					sndLose.volume = 0;
+					sndStart.volume = 0;
+					sndTheme.volume = 0;
+				}
 			}
 
 		update();
@@ -914,6 +951,7 @@ function updateMobCanvasSize()
 	
 	canvas.width = WIDTH;
 	canvas.height = HEIGHT;
+	
 	buttonLeft.width = WIDTH/2;
 	buttonLeft.height = HEIGHT;
 	buttonRight.x = WIDTH/2;
@@ -924,6 +962,11 @@ function updateMobCanvasSize()
 	buttonStart.y = 0.321875 * WIDTH;
 	buttonStart.width = 0.45625 * WIDTH;
 	buttonStart.height = 0.096875 * WIDTH;
+	
+	buttonMute.width = 0.016 * WIDTH;
+	buttonMute.height = 0.016 * WIDTH;
+	buttonMute.x = WIDTH - 0.032 * WIDTH;
+	buttonMute.y = WIDTH * 0.008;
 	
 	for (var i = 0; i < brickArray.length; i++)
 	{
@@ -963,6 +1006,8 @@ function init()
 //this is where we call to update all out objects
 function update()
 {	
+	buttonMute.update();
+	
 	if (gameState == STATE_TITLE)
 	{
 		buttonStart.update();
@@ -1016,11 +1061,18 @@ function draw()
 	
 	context.msImageSmoothingEnabled = false;
 	context.imageSmoothingEnabled = false;
-	
+		
 	if (gameState == STATE_TITLE)
 	{
 		context.drawImage(imgStartBackground,0,0,WIDTH,HEIGHT);
 	}
+	
+	
+	//draw mute icon
+	if(isMuted)
+		context.drawImage(imgMuted, buttonMute.x, buttonMute.y, buttonMute.width, buttonMute.height);
+	else
+		context.drawImage(imgUnmuted, buttonMute.x, buttonMute.y, buttonMute.width, buttonMute.height);
 	
 	
 	if (gameState == STATE_GAME)
