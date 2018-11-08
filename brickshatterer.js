@@ -293,6 +293,7 @@ var
 	context,		//we use context in JS to relate back to the object we use it in
 	keystate,		//check the defined keypress
 	isMob,			//if running on mobile
+	lives,
 	
 	//Game states
 	gameState	= 1,
@@ -306,6 +307,8 @@ var
 	imgPaddle = new Image(),
 	imgBall = new Image(),
 	imgStartBackground = new Image(),
+	imgWinBackground = new Image(),
+	imgLoseBackground = new Image(),
 	imgMuted = new Image(),
 	imgUnmuted = new Image(),
 	
@@ -332,14 +335,6 @@ var
 	brickArray = [],
 	
 	//brick position data is used as a multiplier to WIDTH / height
-	brickPositions =	//13, then 12, and so on for brick pattern
-    [
-        new vector2(.07,.06), new vector2(.14,.06), new vector2(.21,.06), new vector2(.28,.06), new vector2(.35,.06), new vector2(.42,.06), new vector2(.49,.06), new vector2(.56,.06), new vector2(.63,.06), new vector2(.70,.06), new vector2(.77,.06), new vector2(.84,.06), new vector2(.91,.06),
-		new vector2(.10,.105), new vector2(.17,.105), new vector2(.24,.105), new vector2(.31,.105), new vector2(.38,.105), new vector2(.45,.105), new vector2(.52,.105), new vector2(.59,.105), new vector2(.66,.105), new vector2(.73,.105), new vector2(.80,.105), new vector2(.87,.105), 
-		new vector2(.07,.16), new vector2(.14,.16), new vector2(.21,.16), new vector2(.28,.16), new vector2(.35,.16), new vector2(.42,.16), new vector2(.49,.16), new vector2(.56,.16), new vector2(.63,.16), new vector2(.70,.16), new vector2(.77,.16), new vector2(.84,.16), new vector2(.91,.16),
-		new vector2(.10,.2125), new vector2(.17,.2125), new vector2(.24,.2125), new vector2(.31,.2125), new vector2(.38,.2125), new vector2(.45,.2125), new vector2(.52,.2125), new vector2(.59,.2125), new vector2(.66,.2125), new vector2(.73,.2125), new vector2(.80,.2125), new vector2(.87,.2125), 
-    ],
-	
 	brickPositionsName =
 	[
 		new vector2(.04,.048), new vector2(.08,.048), new vector2(.12,.048), new vector2(.20,.048), new vector2(.24,.048), new vector2(.28,.048), new vector2(.36,.048), new vector2(.40,.048), new vector2(.44,.048), new vector2(.52,.048), new vector2(.56,.048), new vector2(.60,.048), new vector2(.68,.048), new vector2(.72,.048), new vector2(.76,.048), new vector2(.84,.048), new vector2(.88,.048), new vector2(.92,.048), 
@@ -363,29 +358,23 @@ var
 		new vector2(.04,.224), new vector2(.08,.224), new vector2(.12,.224), new vector2(.20,.224), new vector2(.24,.224), new vector2(.28,.224), new vector2(.36,.224), new vector2(.40,.224), new vector2(.44,.224), new vector2(.52,.224), new vector2(.56,.224), new vector2(.76,.224), new vector2(.84,.224), new vector2(.88,.224), new vector2(.92,.224)
 	],
 	
-	brickStates =
-	[
-		5,4,5,4,5,4,5,4,5,4,5,4,5,
-		 4,3,4,3,4,3,4,3,4,3,4,3,
-		3,2,3,2,3,2,3,2,3,2,3,2,3,
-		 2,1,2,1,2,1,2,1,2,1,2,1
-	],
-	
+	//state ids for each brick
 	brickStatesName =
 	[
-		5,5,5, 3,3,3, 4,4,4, 4,4,4, 3,3,3, 2,2,2,
-		5,     3,  3, 4,  4, 4,  4, 3,  3, 2,  2,
-		5,     3,  3, 4,  4, 4,  4, 3,  3, 2,2,
-		5,     3,  3, 4,  4, 4,  4, 3,  3, 2,  2,
-		5,5,5, 3,3,3, 4,  4, 4,  4, 3,3,3, 2,  2,
+		5,5,5, 3,2,3, 1,1,1, 1,1,1, 3,2,3, 2,2,2,
+		5,     2,  2, 1,  1, 1,  1, 2,  2, 2,  2,
+		5,     3,  3, 1,  1, 1,  1, 3,  3, 2,2,
+		5,     2,  2, 1,  1, 1,  1, 2,  2, 2,  2,
+		5,5,5, 3,2,3, 1,  1, 1,  1, 3,2,3, 2,  2,
 	
-		2,2,2, 1,1,1, 2,2,2, 1,1,   5,  1, 5,5,5,
-		2,     1,     2,     1,  1, 5,  1, 5,  5,
-		2,2,2, 1,1,1, 2,  2, 1,  1,     1, 5,5,5,
-		    2, 1,     2,  2, 1,  1,     1, 5,  5,
-		2,2,2, 1,1,1, 2,2,2, 1,1,       1, 5,5,5		
+		2,2,2, 1,1,1, 2,2,2, 1,1,   5,  1, 2,1,2,
+		2,     1,     2,     1,  1, 5,  1, 1,  1,
+		2,2,2, 1,1,1, 2,  2, 1,  1,     1, 2,1,2,
+		    2, 1,     2,  2, 1,  1,     1, 1,  1,
+		2,2,2, 1,1,1, 2,2,2, 1,1,       1, 2,1,2		
 
 	],
+
 	
     		
 	//buttons
@@ -395,6 +384,16 @@ var
 		{
 			gameState = STATE_GAME;
 			sndStart.play();
+		}
+	}),
+	
+	buttonReset = new button(0.2640625 * WIDTH, 0.321875 * WIDTH, 0.45625 * WIDTH, 0.096875 * WIDTH, null, "", function(bool)
+	{
+		if(bool)
+		{
+			gameState = STATE_TITLE;
+			clientX=0;
+			clientY=0;
 		}
 	}),
 	
@@ -557,8 +556,14 @@ var
 						brick.collide(i);
 					this.isColliding = true;
 				    this.setReflectNormal(calcCollisionNormal(this.x + this.side/2, this.y + this.side/2, brick.x + brick.width/2, brick.y + brick.height/2, brick.width, brick.height));
-                }
+                }			
             }
+			
+			if(brickArray.length <= 0)
+			{
+				gameState = STATE_WIN;
+				init();
+			}
             
 			//Window collision
 			if (this.y < 1)                  		//Top
@@ -568,6 +573,14 @@ var
 			}
 			else if (this.y >= HEIGHT)    			//Bottom
 			{
+				lives -= 1;
+				if(lives <= 0)
+				{
+					sndLose.play();
+					gameState = STATE_LOSE;
+					init();
+				}
+				
 				this.serve();
 			}
 			else if (this.x < 1)             		//Left
@@ -580,8 +593,6 @@ var
 				this.isColliding = true;
 				this.setReflectNormal(new vector2(-1,0));
 			}
-
-
 			
 			if (this.isColliding)
 			{
@@ -611,12 +622,6 @@ var
 			}
 			
 			this.isPaddleCollision = false;
-
-			//reset the ball when ball is outisde the canvas (bottom side)
-			if (this.y >= HEIGHT - this.side - 2)
-			{
-				this.serve();
-			}
 		},
 
 		//drawing the ball
@@ -631,6 +636,8 @@ imgBrick.src 	= "images/T_Brick.bmp";
 imgPaddle.src 	= "images/T_Paddle.bmp";
 imgBall.src		= "images/T_Ball.bmp";
 imgStartBackground.src = "images/BG_Start.bmp";
+imgWinBackground.src = "images/BG_Win.bmp";
+imgLoseBackground.src = "images/BG_Lose.bmp";
 imgMuted.src = "images/T_Muted.gif";
 imgUnmuted.src = "images/T_Unmuted.gif";
 
@@ -648,7 +655,8 @@ function Main()
 	updateMobCanvasSize();
 	
 	context = canvas.getContext("2d");
-	document.body.appendChild(canvas);
+	
+	document.getElementsByClassName("centred")[0].appendChild(canvas);
 	
 	
 	keystate = {};
@@ -667,9 +675,11 @@ function Main()
 
 	document.addEventListener("touchstart", function(evt)
 	{
+		var rect = canvas.getBoundingClientRect();
+		
 		//cache coords
-		clientX = evt.touches[0].clientX - 8;
-		clientY = evt.touches[0].clientY - 8;
+		clientX = evt.touches[0].clientX - rect.left;
+		clientY = evt.touches[0].clientY - rect.top;
 
 		console.log("clientX:" + clientX-8 + ", clientY: " + clientY-8);
 	}, false);
@@ -690,9 +700,11 @@ function Main()
 
 	document.addEventListener("mousedown", function(evt)
 	{
+		var rect = canvas.getBoundingClientRect();
+
 		//cache coords
-		clientX = evt.clientX - 8;
-		clientY = evt.clientY - 8;
+		clientX = evt.clientX - rect.left;
+		clientY = evt.clientY - rect.top;
 
 		console.log("clientX:" + (clientX-8) + ", clientY: " + (clientY-8));
 	}, false);
@@ -933,7 +945,7 @@ function detectMob()
 //Recalculate positions and sizes of all objects in the game
 function updateMobCanvasSize()
 {
-	var w = window.innerWidth;
+	var w = window.innerWidth*0.85;
 	var h = w*9/16;
 	
 	paddle.x = (paddle.x / WIDTH) * w;
@@ -963,6 +975,11 @@ function updateMobCanvasSize()
 	buttonStart.width = 0.45625 * WIDTH;
 	buttonStart.height = 0.096875 * WIDTH;
 	
+	buttonReset.x = 0.2640625 * WIDTH;
+	buttonReset.y = 0.321875 * WIDTH;
+	buttonReset.width = 0.45625 * WIDTH;
+	buttonReset.height = 0.096875 * WIDTH;
+	
 	buttonMute.width = 0.016 * WIDTH;
 	buttonMute.height = 0.016 * WIDTH;
 	buttonMute.x = WIDTH - 0.032 * WIDTH;
@@ -988,6 +1005,8 @@ function init()
 	paddle.y = HEIGHT - WIDTH*0.060;
 	ball.serve();
 	
+	lives = 6;
+	
 	//loop through brick position array, create all objects, add them to the appropriate array and set states
     for (var i = 0; i < brickPositionsName.length; i++)
     {
@@ -996,11 +1015,18 @@ function init()
         brickArray.push(newBrick);
     }
 	
-	sndBounce.volume = 0.3;
-	sndGameLoop.volume = 0.3;
-	sndLose.volume = 0.3;
-	sndStart.volume = 0.3;
-	sndTheme.volume = 0.3;
+	var vol;
+	
+	if(isMuted)
+		vol = 0;
+	else
+		vol = 0.3;
+	
+	sndBounce.volume = vol;
+	sndGameLoop.volume = vol;
+	sndLose.volume = vol;
+	sndStart.volume = vol;
+	sndTheme.volume = vol;
 }
 
 //this is where we call to update all out objects
@@ -1042,12 +1068,20 @@ function update()
 	
 	if (gameState == STATE_WIN)
 	{
-		
+		if(!sndGameLoop.ispaused)
+		{		
+			sndGameLoop.pause();
+		}
+		buttonReset.update();
 	}
 	
 	if (gameState == STATE_LOSE)
 	{
-		
+		if(!sndGameLoop.ispaused)
+		{		
+			sndGameLoop.pause();
+		}
+		buttonReset.update();
 	}
 }
 
@@ -1061,12 +1095,26 @@ function draw()
 	
 	context.msImageSmoothingEnabled = false;
 	context.imageSmoothingEnabled = false;
+	
+	var fontSize = WIDTH * 0.032;
+	
+	context.font = fontSize + "px Courier New"; //size and font
 		
 	if (gameState == STATE_TITLE)
 	{
 		context.drawImage(imgStartBackground,0,0,WIDTH,HEIGHT);
 	}
 	
+	if (gameState == STATE_WIN)
+	{
+		context.drawImage(imgWinBackground,0,0,WIDTH,HEIGHT);
+
+	}
+	
+	if (gameState == STATE_LOSE)
+	{
+		context.drawImage(imgLoseBackground,0,0,WIDTH,HEIGHT);
+	}
 	
 	//draw mute icon
 	if(isMuted)
@@ -1083,7 +1131,9 @@ function draw()
 		ball.draw();
 		buttonLeft.draw();
 		buttonRight.draw();
-
+		
+		context.fillText("Lives: " + lives, 6, HEIGHT - WIDTH * 0.010);
+		
 		//draw all bricks in array
 		for (var i = 0; i < brickArray.length; i++)
 		{
@@ -1098,12 +1148,11 @@ function draw()
 
 		context.fillStyle = "#F00";	//white draw colour
 		context.strokeStyle="#F00";
-		//text for the stuff
-		context.font = "12px Courier New"; //size and font
 
 		//draw debug text
 		if(showDebug)
 		{
+			context.font = fontSize/2 + "px Courier New"; //size and font
 			context.globalCompositeOperation = 'source-over';
 			context.fillText(Math.ceil(1000/deltaTime) + " FPS", 10, 25);
 			context.fillText("deltaTime: " + deltaTime, 10, 50);
@@ -1117,15 +1166,7 @@ function draw()
 		}
 	}
 	
-	if (gameState == STATE_WIN)
-	{
-		
-	}
-	
-	if (gameState == STATE_LOSE)
-	{
-		
-	}
+
 	
 	context.restore();
 }
