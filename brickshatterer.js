@@ -680,8 +680,6 @@ function Main()
 		//cache coords
 		clientX = evt.touches[0].clientX - rect.left;
 		clientY = evt.touches[0].clientY - rect.top;
-
-		console.log("clientX:" + clientX-8 + ", clientY: " + clientY-8);
 	}, false);
 
 	document.addEventListener("touchend", function(evt)
@@ -705,8 +703,6 @@ function Main()
 		//cache coords
 		clientX = evt.clientX - rect.left;
 		clientY = evt.clientY - rect.top;
-
-		console.log("clientX:" + (clientX-8) + ", clientY: " + (clientY-8));
 	}, false);
 
 	document.addEventListener("mouseup", function(evt)
@@ -743,7 +739,6 @@ function Main()
 		gameTime = timeStamp;
 		time = (gameTime / 1000);
 		timeFrac = time % 1;
-		var boxColour = HSVtoRGB(lerp(0,1,timeFrac*0.1),1,1);
 
 		if(keystate[keyLeft] || touchLeft)
 			moveLeft = true;
@@ -786,7 +781,6 @@ function Main()
 					sndTheme.volume = 0;
 				}
 			}
-
 		update();
 		draw();
 		//this loops the "animation" of the canvas, the max is 60fps
@@ -835,7 +829,7 @@ function calcCollisionNormal(x1,y1,x2,y2,width2,height2)
 }
 
 // r=d−2(d⋅n)n		found on https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
-function calcReflectedVector(direction, normal)	//equation variables are separated horribly like this because it's the only way it would work
+function calcReflectedVector(direction, normal)
 {
 	var dDotn = direction.dot(normal);	//	(d⋅n)
 	var ansn = normal.multS(dDotn);		//	(d⋅n)n
